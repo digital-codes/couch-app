@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 defineProps<{ msg: string }>()
+const emit = defineEmits<{
+  (event: 'count', value: number): void
+}>()
 
 const count = ref(0)
+
+watch(count, (newValue) => {
+  emit('count', newValue)
+})
 </script>
 
 <template>

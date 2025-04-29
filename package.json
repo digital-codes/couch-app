@@ -9,17 +9,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@nuxt/ui": "^3.0.1",
     "@types/pouchdb": "^6.4.2",
-    "axios": "^1.8.4",
+    "@types/pouchdb-browser": "^6.1.5",
+    "axios": "^1.9.0",
     "pouchdb": "^9.0.0",
+    "pouchdb-browser": "^9.0.0",
     "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",
-    "typescript": "^5.2.2",
-    "vite": "^6.2.6",
-    "vue-tsc": "^2.2.8"
+    "typescript": "^5.8.3",
+    "vite": "^6.3.3",
+    "vite-plugin-node-polyfills": "^0.23.0",
+    "vue-tsc": "^2.2.10"
   }
 }
