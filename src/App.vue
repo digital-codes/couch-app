@@ -25,7 +25,7 @@
 // https://terreii.github.io/use-pouchdb/docs/introduction/pouchdb_couchdb
 
 import PouchDB from 'pouchdb-browser';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 const dbName = "http://localhost:5984/"
 const userName = "jan"
@@ -138,6 +138,15 @@ const handleCount = async (count: number) => {
     console.error(err)
   }
 };
+
+
+// Clean up on component unmount
+onUnmounted(() => {
+  if (syncHandler) {
+    syncHandler.cancel()
+  }
+})
+
 
 </script>
 
