@@ -9,6 +9,11 @@
     /* pouchdb */
     "allowSyntheticDefaultImports": true,
 
+    // alias
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",

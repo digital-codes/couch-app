@@ -15,6 +15,21 @@
     <main>
       <RouterView @count="handleCount" />
     </main>
+    <div class="p-4">
+      <h2>Network status: {{ isOnline ? 'Online' : 'Offline' }}</h2>
+
+      <div class="space-y-4 mt-4">
+        <button @click="exportDB" class="px-4 py-2 bg-green-500 rounded text-white">
+          Export Database
+        </button>
+
+        <input type="file" @change="importDB" accept="application/json" class="block" />
+
+        <div v-if="importedCount !== null">
+          <p>Imported {{ importedCount }} documents!</p>
+        </div>
+      </div>
+    </div>
   </UApp>
 </template>
 
@@ -26,6 +41,10 @@
 
 import PouchDB from 'pouchdb-browser';
 import { ref, onMounted, onUnmounted } from 'vue';
+
+import { smartRestore  } from '@/composables/SmartRestore'
+
+import { Network } from '@capacitor/network'
 
 const dbName = "http://localhost:5984/"
 const userName = "jan"
@@ -46,7 +65,17 @@ const docRev = ref('');
 let syncHandler: PouchDB.Replication.Sync<{}> | null = null
 
 
-function getUserDatabaseName(name:string, prefix = 'userdb-') {
+const isOnline = ref(true)
+const importedCount = ref<number | null>(null)
+
+// -- Detect online/offline --
+async function updateNetworkStatus() {
+  const status = await Network.getStatus()
+  isOnline.value = status.connected
+}
+
+
+function getUserDatabaseName(name: string, prefix = 'userdb-') {
   const encoder = new TextEncoder()
   const buffy = encoder.encode(name)
   const bytes = Array.from(buffy).map(byte =>
@@ -56,7 +85,130 @@ function getUserDatabaseName(name:string, prefix = 'userdb-') {
 }
 
 
+// -- Export database as JSON file --
+async function exportDB() {
+  if (!localDb.value) {
+    console.error('Local database is not initialized');
+    return;
+  }
+  syncHandler?.cancel()
+  console.log('Sync handler cancelled');
+  const result = await localDb.value.allDocs({ include_docs: true, attachments: true })
+  const docs = result.rows.map(row => row.doc)
+
+  const blob = new Blob([JSON.stringify(docs, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'pouchdb-backup.json'
+  a.click()
+
+  URL.revokeObjectURL(url)
+}
+
+// -- Import database from JSON file --
+async function importDB(event: Event) {
+  if (!localDb.value) {
+    console.error('Local database is not initialized');
+    return;
+  }
+
+  /*
+  const allDocs = await localDb.value.allDocs()
+  const deletions = allDocs.rows.map(row => ({
+    _id: row.id,
+    _rev: row.value.rev,
+    _deleted: true,
+  }))
+
+  await localDb.value.bulkDocs(deletions)
+  console.log('Deleted all documents');
+  */
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files.length > 0) {
+    const file = input.files[0]
+    const text = await file.text()
+    const docs = JSON.parse(text)
+    console.log('Parsed documents:', docs);
+
+    const result = await smartRestore(localDb.value, docs)
+    console.log('Imported documents:', docs, result.imported);
+
+    // restore rev 
+    const doc = await localDb.value.get(docId);
+    docRev.value = doc._rev;
+    console.log('Document retrieved:', doc);
+    console.log('Document revision:', doc?._rev);
+    // restore sync
+    // setup sync
+    syncHandler = localDb.value.sync(dbUrl.toString(), {
+      live: true,
+      retry: true,
+    }).on('change', (info: any) => {
+      console.log('Sync change:', info)
+    }).on('error', (err) => {
+      console.error('Sync error:', err)
+    })
+      .on('paused', (info) => {
+        console.log('Replication paused:', info);
+      })
+      .on('denied', (info) => {
+        console.error('Replication denied:', info);
+      })
+      .on('complete', (info) => {
+        console.log('Replication complete:', info);
+      })
+    console.log('Sync handler restored');
+  }
+
+}
+
+
+const handleCount = async (count: number) => {
+  console.log('Count from child component:', count);
+  if (!syncHandler) {
+    console.error('Sync handler is not initialized');
+  }
+  try {
+    let response
+    if (docRev.value === '') {
+      response = await localDb.value?.put({
+        _id: docId,
+        value: count,
+      })
+    } else {
+      response = await localDb.value?.put({
+        _id: docId,
+        value: count,
+        _rev: docRev.value,
+      })
+    }
+    console.log('Document saved:', response);
+    if (response?.ok) {
+      docRev.value = response.rev;
+    }
+    const doc = await localDb.value?.get(docId);
+    console.log('Document retrieved:', doc);
+    console.log('Document revision:', doc?._rev);
+  } catch (err) {
+    console.error(err)
+  }
+};
+
+
+
 onMounted(async () => {
+
+  await updateNetworkStatus()
+
+  Network.addListener('networkStatusChange', (status) => {
+    isOnline.value = status.connected
+  })
+
+  window.addEventListener('online', () => (isOnline.value = true))
+  window.addEventListener('offline', () => (isOnline.value = false))
+
 
   localDb.value = new PouchDB('localdb', {
     auto_compaction: true,
@@ -65,7 +217,7 @@ onMounted(async () => {
   syncHandler = localDb.value.sync(dbUrl.toString(), {
     live: true,
     retry: true,
-  }).on('change', (info:any) => {
+  }).on('change', (info: any) => {
     console.log('Sync change:', info)
   }).on('error', (err) => {
     console.error('Sync error:', err)
@@ -108,43 +260,14 @@ onMounted(async () => {
   });
 });
 
-const handleCount = async (count: number) => {
-  console.log('Count from child component:', count);
-  if (!syncHandler) {
-    console.error('Sync handler is not initialized');
-  }
-  try {
-    let response
-    if (docRev.value === '') {
-      response = await localDb.value?.put({
-        _id: docId,
-        value: count,
-      })
-    } else {
-      response = await localDb.value?.put({
-        _id: docId,
-        value: count,
-        _rev: docRev.value,
-      })
-    }
-    console.log('Document saved:', response);
-    if (response?.ok) {
-      docRev.value = response.rev;
-    }
-    const doc = await localDb.value?.get(docId);
-    console.log('Document retrieved:', doc);
-    console.log('Document revision:', doc?._rev);
-  } catch (err) {
-    console.error(err)
-  }
-};
-
 
 // Clean up on component unmount
 onUnmounted(() => {
   if (syncHandler) {
     syncHandler.cancel()
   }
+  window.removeEventListener('online', () => (isOnline.value = true))
+  window.removeEventListener('offline', () => (isOnline.value = false))
 })
 
 
