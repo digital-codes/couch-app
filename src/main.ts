@@ -5,8 +5,8 @@ import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 //import ui from '@nuxt/ui/vue-plugin'
 
-import '@/registerServiceWorker'
-
+//import '@/registerServiceWorker'
+// managed by plugin-pwa
 
 import HomeView from './components/HelloWorld.vue'
 import AboutView from './components/HelloWorld.vue'
