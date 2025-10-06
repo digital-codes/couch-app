@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
+    "build": "vue-tsc && vite build; cp src/assets/img/pwa/* dist/",
     "preview": "vite preview",
-    "assets": "pwa-asset-generator src/assets/img/dummyLogo.png public/icons --index ./index.html --manifest public/manifest.webmanifest --no-prompt"
+    "assets": "pwa-assets-generator --preset minimal-2023 src/assets/img/pwa/dummyLogo.png "
   },
   "dependencies": {
     "@capacitor/core": "^7.4.3",
@@ -22,8 +22,8 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^7.4.3",
+    "@vite-pwa/assets-generator": "^1.0.1",
     "@vitejs/plugin-vue": "^6.0.1",
-    "pwa-asset-generator": "^8.1.2",
     "typescipt": "^1.0.0",
     "typescript": "^5.8.3",
     "vite": "^7.1.8",

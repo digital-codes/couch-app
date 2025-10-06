@@ -26,3 +26,7 @@ components.d.ts
 *.njsproj
 *.sln
 *.sw?
+
+# generated icons
+src/assets/img/pwa/*
+
