@@ -10,25 +10,24 @@
     "assets": "pwa-assets-generator --preset minimal-2023 src/assets/img/pwa/dummyLogo.png "
   },
   "dependencies": {
-    "@capacitor/core": "^7.4.3",
-    "@capacitor/network": "^7.0.2",
+    "@capacitor/core": "^8.0.1",
+    "@capacitor/network": "^8.0.0",
     "@types/pouchdb": "^6.4.2",
     "@types/pouchdb-browser": "^6.1.5",
-    "axios": "^1.12.2",
+    "axios": "^1.13.2",
     "pouchdb": "^9.0.0",
     "pouchdb-browser": "^9.0.0",
-    "vue": "^3.5.22",
-    "vue-router": "^4.5.1"
+    "vue": "^3.5.27",
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.4.3",
-    "@vite-pwa/assets-generator": "^1.0.1",
-    "@vitejs/plugin-vue": "^6.0.1",
-    "typescipt": "^1.0.0",
-    "typescript": "^5.8.3",
-    "vite": "^7.1.11",
+    "@capacitor/cli": "^7.4.5",
+    "@vite-pwa/assets-generator": "^1.0.2",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
     "vite-plugin-node-polyfills": "^0.24.0",
-    "vite-plugin-pwa": "^1.0.3",
-    "vue-tsc": "^3.1.0"
+    "vite-plugin-pwa": "^1.2.0",
+    "vue-tsc": "^3.2.3"
   }
 }
