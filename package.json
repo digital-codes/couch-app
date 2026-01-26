@@ -10,7 +10,7 @@
     "assets": "pwa-assets-generator --preset minimal-2023 src/assets/img/pwa/dummyLogo.png "
   },
   "dependencies": {
-    "@capacitor/core": "^8.0.1",
+    "@capacitor/core": "^8.0.0",
     "@capacitor/network": "^8.0.0",
     "@types/pouchdb": "^6.4.2",
     "@types/pouchdb-browser": "^6.1.5",
@@ -21,7 +21,7 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.4.5",
+    "@capacitor/cli": "^8.0.0",
     "@vite-pwa/assets-generator": "^1.0.2",
     "@vitejs/plugin-vue": "^6.0.3",
     "typescript": "^5.9.3",
